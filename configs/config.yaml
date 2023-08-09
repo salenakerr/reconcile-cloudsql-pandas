@@ -1,0 +1,38 @@
+# db_config.yaml
+mysql:
+  host: your_mysql_host
+  port: your_mysql_port
+  user: your_mysql_user
+  password: your_mysql_password
+  database: your_mysql_database
+
+postgres:
+  host: your_postgres_host
+  port: your_postgres_port
+  user: your_postgres_user
+  password: your_postgres_password
+  database: your_postgres_database
+  schema: your_postgres_schema
+
+result_postgres:
+  host: your_result_postgres_host
+  port: your_result_postgres_port
+  user: your_result_postgres_user
+  password: your_result_postgres_password
+  database: your_result_postgres_database
+  schema: your_postgres_schema
+
+reconcile_type: full_schedule
+
+release_version: "1.0"
+src_project_id: your_source_project_id
+src_instance_name: your_source_instance_name
+src_table: your_source_table
+target_dataset: your_target_dataset
+target_table: your_target_table
+condition_key: ""  # Default blank value
+condition_start: ""  # Default blank value
+condition_end: ""  # Default blank value
+
+# config.yaml
+src_type: mysql  # Set this to 'mysql' or 'postgres' based on the source type

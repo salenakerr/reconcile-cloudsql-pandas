@@ -109,6 +109,25 @@ def update_final_result(preliminary_df, result):
             VALUES ('mismatch_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{short_uuid}', '{row['reconcile_id']}', '{escaped_mismatch_record}', '{index}', 'open', '{datetime.now()}', '{datetime.now()}');
             """
             cursor.execute(insert_mismatch_query)
+
+        # Insert new rows into tbl_missing_record using SQL
+        for index in result['missing_record']:
+            short_uuid = str(uuid.uuid4())[:8]
+            insert_missing_query = f"""
+            INSERT INTO tbl_missing_record (id, reconcile_id, record_id, fix_status, created_at, updated_at)
+            VALUES ('missing_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{short_uuid}', '{row['reconcile_id']}', '{index}', 'open', '{datetime.now()}', '{datetime.now()}');
+            """
+            cursor.execute(insert_missing_query)
+
+        # Insert new rows into tbl_duplicate_record using SQL
+        for index in result['duplicate_record']:
+            short_uuid = str(uuid.uuid4())[:8]
+            insert_dup_query = f"""
+            INSERT INTO tbl_dup_record (id, reconcile_id, record_id, fix_status, created_at, updated_at)
+            VALUES ('dup_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{short_uuid}', '{row['reconcile_id']}', '{index}', 'open', '{datetime.now()}', '{datetime.now()}');
+            """
+            cursor.execute(insert_dup_query)
+        
         
         conn.commit()
 

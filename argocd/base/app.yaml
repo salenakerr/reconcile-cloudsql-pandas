@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+  name: reconcile-cloudsql-poc
+spec:
+  destination:
+    name: in-cluster
+    namespace: reconcile-poc
+  project: default
+  source:
+    path: base
+    repoURL: ssh://your-git-url/reconcile-cloudsql-poc.git
+    targetRevision: main
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

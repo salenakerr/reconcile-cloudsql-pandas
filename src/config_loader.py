@@ -10,7 +10,7 @@ def load_config(file_path):
 def get_google_secret(secret_ref):
     # Authenticate the Google Cloud Service Account
     client = secretmanager_v1.SecretManagerServiceClient().from_service_account_json(
-        config['sa']
+        config['default_sa_path']
     )
 
     # Retrieve the password from Secret Manager
@@ -20,4 +20,4 @@ def get_google_secret(secret_ref):
     return password
 
 # Load configurations from db_config.yaml and config.yaml into module-level variables
-config = load_config("configs/config.yaml")
+config = load_config("/configs/config.yaml")

@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reconcile-cloudsql-poc-cronjob
+spec:
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: reconcile-cloudsql-poc-cronjob
+            image: "asia.gcr.io/your-project-id/reconcile-cloudsql-poc:sit"
+            imagePullPolicy: Always
+            volumeMounts:
+            - name: config-file
+              mountPath: /configs
+            - name: secrets
+              mountPath: /secrets
+            resources:
+              limits:
+                cpu: 1
+                memory: 2Gi
+              requests:
+                cpu: 1
+                memory: 2Gi
+          restartPolicy: Never
+      volumes:
+      - name: secrets
+        secret:
+          secretName: reconcile-cloudsql-poc-cronjob-secret-file
+      - name: config-file
+        configMap:
+          name: reconcile-cloudsql-poc-cronjob-configmap-file

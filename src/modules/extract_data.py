@@ -2,12 +2,20 @@
 from config_loader import config, get_google_secret
 import pandas as pd
 import mysql.connector
-import psycopg2
+import psycopg2, os, tempfile
 from google.cloud import bigquery
 from google.cloud import secretmanager_v1
 
 
 def bq_query(query, project_id):
+    # Create a temporary file to store the SA JSON
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    service_account_json = get_google_secret(config["secret_bigquery_path"])
+    # Write the SA JSON to the temporary file
+    with open(temp_file.name, "w") as f:
+        f.write(service_account_json)
+
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = temp_file.name
     # Create a BigQuery client
     client = bigquery.Client(project=project_id)
 

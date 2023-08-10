@@ -1,4 +1,4 @@
-import logging
+import logging,os
 from urllib.parse import quote_plus
 from config_loader import config, get_google_secret
 from modules.extract_data import mysql_query, postgres_query, bq_query
@@ -66,6 +66,7 @@ def reconcile_data_with_bigquery():
 
 def main():
     try:
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['default_sa_path']
         # Perform the data reconciliation between MySQL/PostgreSQL and BigQuery
         reconcile_data_with_bigquery()
     except Exception as e:

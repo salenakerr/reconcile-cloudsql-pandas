@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: reconcile-cloudsql-poc-cronjob
+spec:
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
+  schedule: "CRON_TZ=Asia/Bangkok 00 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: reconcile-cloudsql-poc-cronjob  
+            resources:
+              limits:
+                cpu: 1
+                memory: 2Gi
+              requests:
+                cpu: 1
+                memory: 2Gi

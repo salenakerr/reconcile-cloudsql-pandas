@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base
+configMapGenerator:
+- behavior: merge
+  files:
+  - configs/config.yaml
+  name: reconcile-cloudsql-poc-cronjob-configmap-file
+
+secretGenerator:
+- behavior: merge
+  files:
+    - secrets/sa.json
+  name: reconcile-cloudsql-poc-cronjob-secret-file
+images:
+- name: asia.gcr.io/your-project-id/reconcile-cloudsql-poc
+  newTag: 0.0.1
+patchesStrategicMerge:
+- patches/set_resources.yaml

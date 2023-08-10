@@ -1,0 +1,38 @@
+# configs/config.yaml
+mysql:
+  host: your_mysql_host
+  port: your_mysql_port
+  user: your_mysql_user
+  password: your_mysql_password
+
+postgres:
+  host: 34.142.210.31
+  port: 5432
+  user: appusr
+  password: projects/project-id/secrets/pgls-password/versions/latest
+  schema: public
+
+result_postgres:
+  host: localhost
+  port: 5432
+  user: reconcileusr
+  password: projects/project-id/secrets/pgls-password/versions/latest
+  database: reconcile_summary
+  schema: public
+
+reconcile_type: full_schedule
+
+release_version: "1.0"
+src_project_id: project-id
+src_instance_name: project-id-pqsql-04
+src_database: reconcile
+src_table: perf_test_1000000_79
+target_dataset: reconcile_perf_mil
+target_table: poc_pgsql_reconcile_million_2_tbls_public_perf_test_1000000_79
+condition_key: ""  # Default blank value
+condition_start: ""  # Default blank value
+condition_end: ""  # Default blank value
+
+src_type: postgres  # Set this to 'mysql' or 'postgres' based on the source type
+
+sa: /secrets/sa.json

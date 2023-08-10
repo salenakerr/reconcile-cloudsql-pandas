@@ -28,10 +28,10 @@ spec:
                 cpu: 1
                 memory: 2Gi
           restartPolicy: Never
-      volumes:
-      - name: secrets
-        secret:
-          secretName: reconcile-cloudsql-poc-cronjob-secret-file
-      - name: config-file
-        configMap:
-          name: reconcile-cloudsql-poc-cronjob-configmap-file
+          volumes:
+          - name: secrets
+            secret:
+              secretName: reconcile-cloudsql-poc-cronjob-secret-file
+          - name: config-file
+            configMap:
+              name: reconcile-cloudsql-poc-cronjob-configmap-file

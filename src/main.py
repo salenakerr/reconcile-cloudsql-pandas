@@ -1,43 +1,76 @@
-# main.py
-from config_loader import config
+import logging
+from urllib.parse import quote_plus
+from config_loader import config, get_google_secret
 from modules.extract_data import mysql_query, postgres_query, bq_query
 from modules.data_reconciler import (
     reconcile_mysql_with_bigquery,
     reconcile_postgres_with_bigquery,
+)
+from modules.store_result import (
     store_preliminary_result,
     update_final_result,
 )
 
-def reconcile_data_with_bigquery():
-    preliminary_result = store_preliminary_result()
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-    #test
-    #columns_to_drop_postgres = ['json_col', 'jsonb_col','array_col','inet_col','point_col']
-    columns_to_drop_bq = ['__deleted', 'key']
-    
-    if config['src_type'] == 'mysql':
-        mysql_df = mysql_query("SELECT * FROM {} LIMIT 10".format(config['src_table']), config['mysql'])
-        bq_df = bq_query("SELECT * FROM {}.{} LIMIT 10".format(config['target_dataset'], config['target_table']), config['src_project_id'])
-        result = reconcile_mysql_with_bigquery(mysql_df, bq_df)
-        update_final_result(preliminary_result, result)
-    elif config['src_type'] == 'postgres':
-        postgres_df = postgres_query("SELECT * FROM {}.{} ORDER BY id".format(config['postgres']['schema'], config['src_table']), config['postgres'])
-        bq_df = bq_query("SELECT * FROM {}.{} ORDER BY id".format(config['target_dataset'], config['target_table']), config['src_project_id'])
-
-       #postgres_df.drop(columns_to_drop_postgres, axis=1, inplace=True)
-        bq_df.drop(columns_to_drop_bq, axis=1, inplace=True)
-
-        print(postgres_df.timestamp_col)
-        print(bq_df.timestamp_col)
-
-        result = reconcile_postgres_with_bigquery(postgres_df, bq_df)
-        update_final_result(preliminary_result, result)
+def fetch_data(query_string, source_type, project_id=None):
+    if source_type == 'mysql':
+        return mysql_query(query_string, config['mysql'])
+    elif source_type == 'postgres':
+        return postgres_query(query_string, config['postgres'])
+    elif source_type == 'bigquery':
+        return bq_query(query_string, project_id)
     else:
-        raise ValueError("Invalid src_type. Supported values are 'mysql' and 'postgres'.")
+        raise ValueError("Invalid source_type. Supported values are 'mysql', 'postgres', and 'bigquery'.")
+
+def reconcile_data_with_bigquery():
+    try:
+        logging.info("BEGIN: Starting data reconciliation process...")
+
+        preliminary_result = store_preliminary_result()
+
+        logging.info("BEGIN: Fetching and preprocessing data...")
+
+        columns_to_drop_bq = ['__deleted', 'key']
+        # Fetching and preprocessing data
+        src_query_string = "SELECT * FROM {}".format(config['src_table'])
+        target_query_string = "SELECT * FROM {}.{}".format(config['target_dataset'], config['target_table'])
+        
+        if 'primary_key' in config:
+            src_query_string += " ORDER BY {}".format(config['primary_key'])
+            target_query_string += " ORDER BY {}".format(config['primary_key'])
+        
+        src_df = fetch_data(src_query_string, config['src_type'])
+        target_df = fetch_data(target_query_string, 'bigquery', config['src_project_id'])
+        target_df.drop(columns_to_drop_bq, axis=1, inplace=True)
+
+        logging.info("END: Fetching and preprocessing data completed successfully.")
+
+
+        #"Performing data reconciliation
+        if config['src_type'] == 'mysql':
+            result = reconcile_mysql_with_bigquery(src_df, target_df)
+        elif config['src_type'] == 'postgres':
+            result = reconcile_postgres_with_bigquery(src_df, target_df)
+        else:
+            raise ValueError("Invalid src_type. Supported values are 'mysql' and 'postgres'.")
+
+        update_final_result(preliminary_result, result)
+
+        logging.info("END: Data reconciliation process completed successfully.")
+    except Exception as e:
+        logging.error("END: An error occurred during data reconciliation:", exc_info=True)
+        print("An error occurred:", str(e))
 
 def main():
-    # Perform the data reconciliation between MySQL or PostgreSQL and BigQuery
-    reconcile_data_with_bigquery()
+    try:
+        # Perform the data reconciliation between MySQL/PostgreSQL and BigQuery
+        reconcile_data_with_bigquery()
+    except Exception as e:
+        logging.error("END: An error occurred:", exc_info=True)
+        print("An error occurred:", str(e))
 
 if __name__ == "__main__":
     main()

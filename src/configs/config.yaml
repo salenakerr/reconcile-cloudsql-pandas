@@ -6,7 +6,7 @@ mysql:
   password: your_mysql_password
 
 postgres:
-  host: 34.142.210.31
+  host: localhost
   port: 5432
   user: appusr
   password: projects/project-id/secrets/pgls-password/versions/latest
